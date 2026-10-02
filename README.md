@@ -117,6 +117,21 @@ mvn clean package
 `/metrics` shows the endpoint and current readings in-game; `/healthz` returns
 `ok` for orchestrator probes.
 
+## Verification
+
+```bash
+./verify.sh          # builds, runs tests, checks bytecode version
+```
+
+**8 unit tests** assert the rendered output against exposition format v0.0.4. A
+malformed body does not raise — Prometheus drops the target and the dashboard
+goes quietly blank, so the format has to be asserted rather than eyeballed.
+
+Covered: every sample line parses with matching `HELP`/`TYPE`, the body
+terminates with a newline, no metric name is declared twice, the
+disabled-tile-entity sentinel (`-1`) is omitted rather than plotted, and a zero
+max-heap does not divide by zero.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
