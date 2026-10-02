@@ -1,0 +1,73 @@
+# ═══════════════════════════════════════════════════════════════
+#  Alerting rules
+#
+#  Thresholds are chosen against the 50ms tick budget and are held
+#  "for" a few minutes each. Alerting on an instantaneous dip would
+#  page on every chunk-save burst; sustained degradation is what
+#  actually needs a human.
+# ═══════════════════════════════════════════════════════════════
+
+groups:
+  - name: minecraft-performance
+    rules:
+      - alert: MinecraftLowTPS
+        expr: minecraft_tps{window="5m"} < 18
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'TPS below 18 on {{ $labels.host }}'
+          description: '5m TPS is {{ $value | printf "%.2f" }}. Players will feel this.'
+
+      - alert: MinecraftCriticalTPS
+        expr: minecraft_tps{window="1m"} < 12
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'TPS critical on {{ $labels.host }}'
+          description: '1m TPS is {{ $value | printf "%.2f" }}; the server is failing to keep up.'
+
+      - alert: MinecraftTickBudgetExceeded
+        expr: minecraft_mspt_mean > 45
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'MSPT near the tick budget on {{ $labels.host }}'
+          description: 'Mean MSPT is {{ $value | printf "%.1f" }}ms of the 50ms budget.'
+
+      - alert: MinecraftHeapPressure
+        expr: minecraft_heap_used_ratio > 0.90
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Heap above 90% on {{ $labels.host }}'
+          description: 'Sustained high heap usually means a leak or an undersized -Xmx.'
+
+      - alert: MinecraftEntityExplosion
+        expr: minecraft_entities_total > 15000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Entity count very high on {{ $labels.host }}'
+          description: '{{ $value }} entities loaded. Check for runaway farms.'
+
+      - alert: MinecraftExporterStale
+        expr: minecraft_sample_age_seconds > 60
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Metrics stale on {{ $labels.host }}'
+          description: 'The sampling task has stopped, which usually means the main thread is blocked.'
+
+      - alert: MinecraftServerDown
+        expr: up{job="minecraft"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Exporter unreachable on {{ $labels.host }}'

@@ -1,0 +1,36 @@
+# ═══════════════════════════════════════════════════════════════
+#  Prometheus scrape configuration
+#
+#  scrape_interval must be longer than the plugin's sampling
+#  interval, otherwise consecutive scrapes return the same sample
+#  and the graphs show artificial plateaus.
+# ═══════════════════════════════════════════════════════════════
+
+scrape_configs:
+  - job_name: 'minecraft'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+
+    static_configs:
+      - targets:
+          - '10.0.0.11:9225'
+          - '10.0.0.12:9225'
+          - '10.0.0.13:9225'
+        labels:
+          network: 'codehub'
+
+    # Uncomment when exporter.bearer-token is set.
+    # authorization:
+    #   type: Bearer
+    #   credentials: 'REPLACE_WITH_TOKEN'
+
+    relabel_configs:
+      # Turn host:port into a readable instance label.
+      - source_labels: [__address__]
+        regex: '([^:]+):\d+'
+        target_label: host
+        replacement: '${1}'
+
+rule_files:
+  - 'alerts.yml'
