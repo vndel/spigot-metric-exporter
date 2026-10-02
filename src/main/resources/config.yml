@@ -1,0 +1,30 @@
+# ───────────────────────────────────────────────────────────────
+#  SpigotMetricExporter
+#
+#  The /metrics endpoint is UNAUTHENTICATED by default and reveals
+#  player counts, heap sizing and uptime. Keep it on loopback and
+#  let Prometheus scrape locally, or set a bearer token and
+#  firewall the port.
+# ───────────────────────────────────────────────────────────────
+
+exporter:
+  # Loopback by default, deliberately. Change this only together
+  # with a firewall rule or a bearer token.
+  bind: '127.0.0.1'
+  port: 9225
+  path: '/metrics'
+
+  # Optional shared secret. Prometheus sends it via
+  # authorization.credentials in scrape_configs.
+  bearer-token: ''
+
+  # Sampling cadence. 100 ticks = 5s, comfortably finer than a
+  # typical 15s scrape interval.
+  sample-interval-ticks: 100
+
+  # Tile-entity counting walks every loaded chunk. It is the most
+  # expensive metric here; disable it on very large worlds.
+  count-tile-entities: true
+
+  # Refresh tile entities every Nth sample rather than every sample.
+  tile-entity-refresh-multiplier: 6
