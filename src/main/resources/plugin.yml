@@ -1,0 +1,18 @@
+name: SpigotMetricExporter
+version: '${project.version}'
+main: com.fivemcodehub.metrics.MetricExporterPlugin
+api-version: '1.20'
+authors: [vndel]
+description: Prometheus exporter for TPS, MSPT, heap and chunk counts
+website: https://team.fivemcodehub.com
+
+commands:
+  metrics:
+    description: Exporter status
+    usage: /metrics
+    permission: metrics.admin
+
+permissions:
+  metrics.admin:
+    description: Administrative access
+    default: op
